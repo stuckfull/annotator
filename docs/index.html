@@ -4,28 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FST Annotator Demo (SPA)</title>
-    <!-- Tailwind for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- minirouter for SPA navigation -->
     <script src="https://cdn.jsdelivr.net/gh/milio48/minirouter.js@main/dist/v1.1/minirouter.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-bg: #eef2ff;
+            --border-color: #e0e7ff;
+            --nav-bg: #4f46e5;
+            --card-bg: #ffffff;
+            --success: #10b981;
+            --success-hover: #059669;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--nav-bg);
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* Main App Container */
+        #app {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            min-height: 400px;
+        }
+
+        /* Typography */
+        h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; color: #1e293b; }
+        h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; color: #334155; margin-top: 1.5rem; }
+        p { margin-bottom: 1rem; color: var(--text-light); }
+        ul { padding-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-light); }
+        li { margin-bottom: 0.5rem; }
+        strong { color: var(--text-main); }
+
+        /* Code & Pre */
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.95rem;
+        }
+
+        /* Test Area */
+        .test-area {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-title {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Buttons */
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        
+        button.btn-success { background-color: var(--success); box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
+        button.btn-success:hover { background-color: var(--success-hover); }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        input, select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Utilities */
+        .result-text { margin-top: 1rem; font-size: 0.9rem; font-family: monospace; color: var(--primary); }
+        .max-w-md { max-width: 28rem; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body>
 
-    <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">FST Annotator Demo</h1>
-            <div class="space-x-4">
-                <a href="/" class="hover:text-indigo-200 transition">Home</a>
-                <a href="/about" class="hover:text-indigo-200 transition">About</a>
-                <a href="/checkout" class="hover:text-indigo-200 transition">Checkout</a>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">FST Annotator Demo</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/checkout">Checkout</a>
             </div>
         </div>
     </nav>
 
-    <div class="container mx-auto p-6 mt-8 bg-white rounded-xl shadow-sm min-h-[400px]" id="app">
+    <div id="app">
         <!-- SPA View Container -->
     </div>
 
@@ -33,17 +191,15 @@
     <script src="https://cdn.jsdelivr.net/gh/stuckfull/annotator@main/annotator.js"></script>
 
     <script>
-        // Setup Elemen App
         const app = document.getElementById('app');
 
-        // Mock View Templates
         const routes = {
             '/': `
-                <h2 class="text-3xl font-bold mb-4 text-slate-800">FST Annotator</h2>
-                <p class="mb-6 text-lg text-slate-600"><strong>FST Annotator</strong> adalah tool <em>client-side</em> ringan (Vanilla JS) yang berfungsi sebagai <strong>Man-In-The-Middle Debugger</strong>. Alat ini memungkinkan Developer atau tim QA untuk menganotasi elemen antarmuka langsung di browser, mencegat (intercept) event klik, serta secara otomatis merekam riwayat navigasi dan Network API Logs.</p>
+                <h2>FST Annotator</h2>
+                <p><strong>FST Annotator</strong> adalah tool <em>client-side</em> ringan (Vanilla JS) yang berfungsi sebagai <strong>Man-In-The-Middle Debugger</strong>. Alat ini memungkinkan Developer atau tim QA untuk menganotasi elemen antarmuka langsung di browser, mencegat (intercept) event klik, serta secara otomatis merekam riwayat navigasi dan Network API Logs.</p>
                 
-                <h3 class="text-xl font-bold mb-3 text-slate-700">🚀 Fitur Utama</h3>
-                <ul class="list-disc pl-6 mb-6 space-y-2 text-slate-600">
+                <h3>🚀 Fitur Utama</h3>
+                <ul>
                     <li><strong>Visual Element Selector:</strong> Arahkan kursor dan klik elemen apa saja di layar untuk menandainya (dilengkapi dengan outline interaktif dan pencatatan CSS Selector serta Tag HTML secara otomatis).</li>
                     <li><strong>Save & Release (MITM Debugger):</strong> Mem-pause event klik asli, memberikan waktu untuk menulis anotasi/bug report, lalu meneruskan event tersebut agar flow web berjalan normal.</li>
                     <li><strong>Network Log Interceptor:</strong> Secara background menangkap semua request HTTP dari Fetch API maupun XMLHttpRequest (termasuk payload).</li>
@@ -51,48 +207,46 @@
                     <li><strong>Auto Markdown Report:</strong> Menghasilkan laporan AI Debugging berformat Markdown yang rapi.</li>
                 </ul>
 
-                <h3 class="text-xl font-bold mb-3 text-slate-700">📦 Instalasi</h3>
-                <p class="mb-2 text-slate-600">Tambahkan tag script ini ke dalam HTML proyek Anda:</p>
-                <div class="bg-slate-800 text-slate-100 p-4 rounded-lg mb-8 overflow-x-auto">
-                    <code>&lt;script src="https://cdn.jsdelivr.net/gh/stuckfull/annotator@main/annotator.js"&gt;&lt;/script&gt;</code>
+                <h3>📦 Instalasi</h3>
+                <p>Tambahkan tag script ini ke dalam HTML proyek Anda:</p>
+                <div class="code-block">
+                    &lt;script src="https://cdn.jsdelivr.net/gh/stuckfull/annotator@main/annotator.js"&gt;&lt;/script&gt;
                 </div>
 
-                <div class="p-6 bg-indigo-50 rounded-xl border border-indigo-100 mb-6">
-                    <p class="mb-2 font-semibold text-indigo-900 text-lg">💡 Area Pengujian (AJAX Interceptor)</p>
-                    <p class="mb-4 text-indigo-700">Gunakan tombol di bawah ini untuk mensimulasikan pemanggilan API Fetch. Annotator akan mencatat request ini di background.</p>
-                    <button onclick="fetchMockData()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow font-medium">Simulasi Request Fetch API</button>
-                    <p id="fetch-result" class="mt-4 text-sm text-indigo-800 font-mono"></p>
+                <div class="test-area">
+                    <div class="test-title">💡 Area Pengujian (AJAX Interceptor)</div>
+                    <p>Gunakan tombol di bawah ini untuk mensimulasikan pemanggilan API Fetch. Annotator akan mencatat request ini di background.</p>
+                    <button onclick="fetchMockData()">Simulasi Request Fetch API</button>
+                    <div id="fetch-result" class="result-text"></div>
                 </div>
             `,
             '/about': `
-                <h2 class="text-2xl font-bold mb-4 text-slate-700">Tentang FST Annotator</h2>
-                <div class="prose text-slate-600 max-w-none">
-                    <p>Coba klik tombol <strong>FST</strong> melayang di pojok kanan bawah untuk mengaktifkan <em>Mode Inspect</em>.</p>
-                    <p>Setelah aktif, arahkan kursor (hover) ke elemen mana saja di halaman ini. Klik elemen tersebut untuk menambahkan anotasi bug atau catatan perbaikan.</p>
-                    <p>Gunakan tombol <strong>Save & Release</strong> jika Anda ingin menyimpan catatan dan membiarkan elemen melanjutkan event aslinya secara natural.</p>
-                </div>
+                <h2>Tentang FST Annotator</h2>
+                <p>Coba klik tombol <strong>FST</strong> melayang di pojok kanan bawah untuk mengaktifkan <em>Mode Inspect</em>.</p>
+                <p>Setelah aktif, arahkan kursor (hover) ke elemen mana saja di halaman ini. Klik elemen tersebut untuk menambahkan anotasi bug atau catatan perbaikan.</p>
+                <p>Gunakan tombol <strong>Save & Release</strong> jika Anda ingin menyimpan catatan dan membiarkan elemen melanjutkan event aslinya secara natural.</p>
             `,
             '/checkout': `
-                <h2 class="text-2xl font-bold mb-4 text-slate-700">Halaman Checkout</h2>
-                <form id="checkout-form" onsubmit="event.preventDefault(); simulateXHR();" class="space-y-4 max-w-md">
-                    <div>
-                        <label class="block mb-1 font-medium text-slate-700">Nama Lengkap</label>
-                        <input type="text" class="border border-slate-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" value="John Doe">
+                <h2>Halaman Checkout</h2>
+                <form id="checkout-form" onsubmit="event.preventDefault(); simulateXHR();" class="max-w-md">
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" value="John Doe">
                     </div>
-                    <div>
-                        <label class="block mb-1 font-medium text-slate-700">Metode Pembayaran</label>
-                        <select class="border border-slate-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <div class="form-group">
+                        <label>Metode Pembayaran</label>
+                        <select>
                             <option>Kartu Kredit</option>
                             <option>Transfer Bank</option>
                         </select>
                     </div>
-                    <button type="submit" class="bg-emerald-500 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-600 transition shadow-sm font-semibold w-full">Bayar Sekarang (Test XHR)</button>
+                    <button type="submit" class="btn-success" style="width: 100%;">Bayar Sekarang (Test XHR)</button>
                 </form>
-                <p id="xhr-result" class="mt-3 text-sm text-slate-500 italic"></p>
+                <div id="xhr-result" class="result-text"></div>
             `
         };
 
-        // Inisialisasi Minirouter dengan Hash Mode (cocok untuk GitHub Pages tanpa URL Rewrite Server)
+        // Inisialisasi Minirouter dengan Hash Mode
         const router = new minirouterjs('', true);
 
         router.set('/', () => { app.innerHTML = routes['/']; });
@@ -100,7 +254,7 @@
         router.set('/checkout', () => { app.innerHTML = routes['/checkout']; });
 
         router.setNotFound((params) => {
-            app.innerHTML = `<h2 class="text-2xl font-bold text-red-600">404 Not Found</h2><p>Halaman ${params} tidak ditemukan.</p>`;
+            app.innerHTML = `<h2 style="color: #dc2626;">404 Not Found</h2><p>Halaman ${params} tidak ditemukan.</p>`;
         });
 
         // Fungsi Simulasi FETCH
@@ -108,7 +262,6 @@
             const resultEl = document.getElementById('fetch-result');
             resultEl.innerText = "Loading data...";
             try {
-                // Dummy API 
                 const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
