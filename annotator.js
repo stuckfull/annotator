@@ -6,6 +6,12 @@
     window.__FST_ANNOTATOR_ACTIVE = true;
     console.log("🚀 fullstuck Annotator Injected!");
 
+    // --- SSR vs Client-Side Detection ---
+    const ssrElements = new WeakSet();
+    const markSSR = () => document.querySelectorAll('*').forEach(el => ssrElements.add(el));
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', markSSR);
+    else markSSR();
+
     // --- 1. STATE & DATABASE (Session Manager) ---
     const loadDB = () => {
         const data = JSON.parse(localStorage.getItem('fst_annotator_db'));
@@ -388,10 +394,18 @@
         let elText = STATE.hoveredElement.innerText || '';
         if (elText.length > 100) elText = elText.substring(0, 100) + '...';
 
+        const tagName = STATE.hoveredElement.tagName.toLowerCase();
+        let outerHTML = STATE.hoveredElement.outerHTML || '';
+        if (outerHTML.length > 150) outerHTML = outerHTML.substring(0, 150) + '...';
+        const initiator = ssrElements.has(STATE.hoveredElement) ? 'SSR / Initial HTML' : 'Client-Side (Dynamically Rendered)';
+
         // LOGIKA BARU: Simpan dengan URL
         session.annotations.push({
             url: window.location.href, // <--- Tambahan URL Path
             selector,
+            tagName,
+            outerHTML,
+            initiator,
             innerText: elText.trim(),
             note,
             context: { network: STATE.logs.network.slice(-3), events: STATE.logs.events.slice(-3) }
@@ -427,7 +441,10 @@
         session.annotations.forEach((a, i) => {
             md += `### [Issue #${i + 1}] Target Element\n`;
             md += `- **URL:** ${a.url || 'Unknown'}\n`;
+            md += `- **Initiator:** ${a.initiator || 'Unknown'}\n`;
+            md += `- **Tag Name:** \`<${a.tagName}>\`\n`;
             md += `- **Selector:** \`${a.selector}\`\n`;
+            md += `- **HTML Snippet:** \`${a.outerHTML}\`\n`;
             if (a.innerText) md += `- **Element Text:** "${a.innerText}"\n`;
 
             md += `\n**Instruction / Note:**\n> ${a.note}\n\n`;
