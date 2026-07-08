@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FST Annotator Demo (SPA)</title>
+    <!-- Tailwind for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- minirouter for SPA navigation -->
+    <script src="https://cdn.jsdelivr.net/gh/milio48/minirouter.js@main/dist/v1.1/minirouter.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">FST Annotator Demo</h1>
+            <div class="space-x-4">
+                <a href="#/" class="hover:text-indigo-200 transition">Home</a>
+                <a href="#/about" class="hover:text-indigo-200 transition">About</a>
+                <a href="#/checkout" class="hover:text-indigo-200 transition">Checkout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 mt-8 bg-white rounded-xl shadow-sm min-h-[400px]" id="app">
+        <!-- SPA View Container -->
+    </div>
+
+    <!-- Panggil FST Annotator dari Root (lokal) -->
+    <script src="../annotator.js"></script>
+
+    <script>
+        // Setup Elemen App
+        const app = document.getElementById('app');
+
+        // Mock View Templates
+        const routes = {
+            '/': `
+                <h2 class="text-2xl font-bold mb-4 text-slate-700">Beranda Demo SPA</h2>
+                <p class="mb-4 text-slate-600">Ini adalah contoh aplikasi Single Page (SPA) untuk mendemonstrasikan kemampuan <strong>FST Annotator</strong>.</p>
+                <div class="p-4 bg-indigo-50 rounded border border-indigo-100 mb-6">
+                    <p class="mb-3 font-semibold text-indigo-900">Uji Coba Interceptor Network (AJAX):</p>
+                    <button onclick="fetchMockData()" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition shadow-sm">Simulasi Request Fetch API</button>
+                    <p id="fetch-result" class="mt-3 text-sm text-slate-500 italic"></p>
+                </div>
+            `,
+            '/about': `
+                <h2 class="text-2xl font-bold mb-4 text-slate-700">Tentang FST Annotator</h2>
+                <div class="prose text-slate-600 max-w-none">
+                    <p>Coba klik tombol <strong>FST</strong> melayang di pojok kanan bawah untuk mengaktifkan <em>Mode Inspect</em>.</p>
+                    <p>Setelah aktif, arahkan kursor (hover) ke elemen mana saja di halaman ini. Klik elemen tersebut untuk menambahkan anotasi bug atau catatan perbaikan.</p>
+                    <p>Gunakan tombol <strong>Save & Release</strong> jika Anda ingin menyimpan catatan dan membiarkan elemen melanjutkan event aslinya secara natural.</p>
+                </div>
+            `,
+            '/checkout': `
+                <h2 class="text-2xl font-bold mb-4 text-slate-700">Halaman Checkout</h2>
+                <form id="checkout-form" onsubmit="event.preventDefault(); simulateXHR();" class="space-y-4 max-w-md">
+                    <div>
+                        <label class="block mb-1 font-medium text-slate-700">Nama Lengkap</label>
+                        <input type="text" class="border border-slate-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" value="John Doe">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium text-slate-700">Metode Pembayaran</label>
+                        <select class="border border-slate-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option>Kartu Kredit</option>
+                            <option>Transfer Bank</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-emerald-500 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-600 transition shadow-sm font-semibold w-full">Bayar Sekarang (Test XHR)</button>
+                </form>
+                <p id="xhr-result" class="mt-3 text-sm text-slate-500 italic"></p>
+            `
+        };
+
+        // Inisialisasi Minirouter
+        const router = new MiniRouter({
+            routes: {
+                '/': () => { app.innerHTML = routes['/']; },
+                '/about': () => { app.innerHTML = routes['/about']; },
+                '/checkout': () => { app.innerHTML = routes['/checkout']; }
+            },
+            mode: 'hash', 
+            fallback: '/'
+        });
+
+        router.start();
+
+        // Fungsi Simulasi FETCH
+        window.fetchMockData = async () => {
+            const resultEl = document.getElementById('fetch-result');
+            resultEl.innerText = "Loading data...";
+            try {
+                // Dummy API 
+                const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: 'foo', body: 'bar', userId: 1 })
+                });
+                const data = await res.json();
+                resultEl.innerText = "Fetch Berhasil! Response ID: " + data.id;
+            } catch (err) {
+                resultEl.innerText = "Error mengambil data.";
+            }
+        };
+
+        // Fungsi Simulasi XMLHttpRequest (Legacy)
+        window.simulateXHR = () => {
+            const resultEl = document.getElementById('xhr-result');
+            resultEl.innerText = "Processing XHR...";
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://jsonplaceholder.typicode.com/posts', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                if(xhr.status === 201) {
+                    const data = JSON.parse(xhr.responseText);
+                    resultEl.innerText = "XHR Berhasil! Response ID: " + data.id;
+                }
+            };
+            xhr.send(JSON.stringify({ payment: 'Transfer Bank', amount: 50000 }));
+        };
+    </script>
+</body>
+</html>
