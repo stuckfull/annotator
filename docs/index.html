@@ -18,9 +18,9 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold">FST Annotator Demo</h1>
             <div class="space-x-4">
-                <a href="#/" class="hover:text-indigo-200 transition">Home</a>
-                <a href="#/about" class="hover:text-indigo-200 transition">About</a>
-                <a href="#/checkout" class="hover:text-indigo-200 transition">Checkout</a>
+                <a href="/" class="hover:text-indigo-200 transition">Home</a>
+                <a href="/about" class="hover:text-indigo-200 transition">About</a>
+                <a href="/checkout" class="hover:text-indigo-200 transition">Checkout</a>
             </div>
         </div>
     </nav>
@@ -75,18 +75,16 @@
             `
         };
 
-        // Inisialisasi Minirouter
-        const router = new MiniRouter({
-            routes: {
-                '/': () => { app.innerHTML = routes['/']; },
-                '/about': () => { app.innerHTML = routes['/about']; },
-                '/checkout': () => { app.innerHTML = routes['/checkout']; }
-            },
-            mode: 'hash', 
-            fallback: '/'
-        });
+        // Inisialisasi Minirouter dengan Hash Mode (cocok untuk GitHub Pages tanpa URL Rewrite Server)
+        const router = new minirouterjs('', true);
 
-        router.start();
+        router.set('/', () => { app.innerHTML = routes['/']; });
+        router.set('/about', () => { app.innerHTML = routes['/about']; });
+        router.set('/checkout', () => { app.innerHTML = routes['/checkout']; });
+
+        router.setNotFound((params) => {
+            app.innerHTML = `<h2 class="text-2xl font-bold text-red-600">404 Not Found</h2><p>Halaman ${params} tidak ditemukan.</p>`;
+        });
 
         // Fungsi Simulasi FETCH
         window.fetchMockData = async () => {
