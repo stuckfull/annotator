@@ -62,6 +62,37 @@
             throw error;
         }
     };
+    
+    // Override XMLHttpRequest
+    const originalXHR = window.XMLHttpRequest;
+    window.XMLHttpRequest = function() {
+        const xhr = new originalXHR();
+        let method = 'GET';
+        let url = 'unknown';
+
+        const originalOpen = xhr.open;
+        xhr.open = function(...args) {
+            method = args[0] || 'GET';
+            url = args[1] || 'unknown';
+            return originalOpen.apply(xhr, args);
+        };
+
+        xhr.addEventListener('load', function() {
+            let body = '';
+            try {
+                if (xhr.responseType === '' || xhr.responseType === 'text' || xhr.responseType === 'json') {
+                    body = (typeof xhr.response === 'string' ? xhr.response : JSON.stringify(xhr.response) || xhr.responseText || '').substring(0, 300);
+                }
+            } catch (e) { }
+            addNetworkLog({ url, method }, { status: xhr.status, body });
+        });
+
+        xhr.addEventListener('error', function() {
+            addNetworkLog({ url, method }, { status: 'FAILED', error: 'XHR Network Error' });
+        });
+
+        return xhr;
+    };
     const originalPushState = history.pushState;
     history.pushState = function (...args) {
         addEventLog('NAVIGATE_PUSH', args[2]);
