@@ -30,6 +30,8 @@
     const STATE = {
         isDebugMode: false,
         hoveredElement: null,
+        isReleasing: false,
+        pendingElement: null,
         logs: { network: [], events: [] }
     };
 
@@ -129,6 +131,7 @@
     <textarea id="fst-annotator-note" placeholder="Tulis instruksi anotasi di sini..." style="height: 100px;"></textarea>
     <div style="display: flex; gap: 8px; justify-content: flex-end;">
       <button id="fst-annotator-btn-cancel-note" class="fst-annotator-btn secondary">Cancel</button>
+      <button id="fst-annotator-btn-save-release-note" class="fst-annotator-btn" style="background: #f59e0b;">Save & Release</button>
       <button id="fst-annotator-btn-save-note" class="fst-annotator-btn success">Save Note</button>
     </div>
   `;
@@ -292,10 +295,14 @@
     }, true);
 
     document.addEventListener('click', (e) => {
-        if (!STATE.isDebugMode || e.target.closest('.fst-annotator-ui')) return;
+        if (e.target.closest('.fst-annotator-ui')) return;
+        if (STATE.isReleasing) return; // Allow natural event to pass
+        if (!STATE.isDebugMode) return;
+        
         e.preventDefault();
         e.stopPropagation();
 
+        STATE.pendingElement = e.target;
         addEventLog('CLICK', getSelector(e.target));
         STATE.isDebugMode = false;
 
@@ -314,7 +321,7 @@
         document.getElementById('fst-annotator-btn-toggle').click();
     };
 
-    document.getElementById('fst-annotator-btn-save-note').onclick = () => {
+    const saveCurrentNote = () => {
         const note = document.getElementById('fst-annotator-note').value;
         const selector = getSelector(STATE.hoveredElement);
         const session = getActiveSession();
@@ -338,6 +345,18 @@
         notePopup.style.display = 'none';
         if (STATE.hoveredElement) STATE.hoveredElement.style.outline = '';
         document.getElementById('fst-annotator-btn-toggle').click();
+    };
+
+    document.getElementById('fst-annotator-btn-save-note').onclick = saveCurrentNote;
+
+    document.getElementById('fst-annotator-btn-save-release-note').onclick = () => {
+        saveCurrentNote();
+        if (STATE.pendingElement) {
+            STATE.isReleasing = true;
+            STATE.pendingElement.click(); // Re-trigger normal click
+            STATE.isReleasing = false;
+            STATE.pendingElement = null;
+        }
     };
 
     // LOGIKA BARU: Pemformatan Markdown yang rapi
