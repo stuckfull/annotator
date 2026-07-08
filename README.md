@@ -1,6 +1,10 @@
 # FST Annotator
 
+[![](https://data.jsdelivr.com/v1/package/gh/stuckfull/annotator/badge)](https://www.jsdelivr.com/package/gh/stuckfull/annotator)
+
 Tool *client-side* (Vanilla JS) ringan untuk *Man-In-The-Middle Debugging*. Mencegat event klik, mencatat *User Journey*, menangkap *Network Logs* (Fetch & XHR) secara *background*, lalu merangkumnya dalam Markdown untuk AI Prompt atau Bug Report.
+
+![FST Annotator Screenshot](./docs/ss.jpg)
 
 ## 🚀 Fitur Utama
 - **Intercept & Release:** Jeda interaksi asli -> Tulis Anotasi -> Teruskan event agar web berjalan normal.
