@@ -29,8 +29,8 @@
         <!-- SPA View Container -->
     </div>
 
-    <!-- Panggil FST Annotator dari Root (lokal) -->
-    <script src="../annotator.js"></script>
+    <!-- Panggil FST Annotator dari CDN jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/gh/stuckfull/annotator@main/annotator.js"></script>
 
     <script>
         // Setup Elemen App
@@ -39,12 +39,29 @@
         // Mock View Templates
         const routes = {
             '/': `
-                <h2 class="text-2xl font-bold mb-4 text-slate-700">Beranda Demo SPA</h2>
-                <p class="mb-4 text-slate-600">Ini adalah contoh aplikasi Single Page (SPA) untuk mendemonstrasikan kemampuan <strong>FST Annotator</strong>.</p>
-                <div class="p-4 bg-indigo-50 rounded border border-indigo-100 mb-6">
-                    <p class="mb-3 font-semibold text-indigo-900">Uji Coba Interceptor Network (AJAX):</p>
-                    <button onclick="fetchMockData()" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition shadow-sm">Simulasi Request Fetch API</button>
-                    <p id="fetch-result" class="mt-3 text-sm text-slate-500 italic"></p>
+                <h2 class="text-3xl font-bold mb-4 text-slate-800">FST Annotator</h2>
+                <p class="mb-6 text-lg text-slate-600"><strong>FST Annotator</strong> adalah tool <em>client-side</em> ringan (Vanilla JS) yang berfungsi sebagai <strong>Man-In-The-Middle Debugger</strong>. Alat ini memungkinkan Developer atau tim QA untuk menganotasi elemen antarmuka langsung di browser, mencegat (intercept) event klik, serta secara otomatis merekam riwayat navigasi dan Network API Logs.</p>
+                
+                <h3 class="text-xl font-bold mb-3 text-slate-700">🚀 Fitur Utama</h3>
+                <ul class="list-disc pl-6 mb-6 space-y-2 text-slate-600">
+                    <li><strong>Visual Element Selector:</strong> Arahkan kursor dan klik elemen apa saja di layar untuk menandainya (dilengkapi dengan outline interaktif dan pencatatan CSS Selector serta Tag HTML secara otomatis).</li>
+                    <li><strong>Save & Release (MITM Debugger):</strong> Mem-pause event klik asli, memberikan waktu untuk menulis anotasi/bug report, lalu meneruskan event tersebut agar flow web berjalan normal.</li>
+                    <li><strong>Network Log Interceptor:</strong> Secara background menangkap semua request HTTP dari Fetch API maupun XMLHttpRequest (termasuk payload).</li>
+                    <li><strong>SPA & SSR Persistence:</strong> History klik dan jaringan disimpan di sessionStorage, sehingga persisten meski terjadi navigasi SPA maupun Full-Page Reload.</li>
+                    <li><strong>Auto Markdown Report:</strong> Menghasilkan laporan AI Debugging berformat Markdown yang rapi.</li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-3 text-slate-700">📦 Instalasi</h3>
+                <p class="mb-2 text-slate-600">Tambahkan tag script ini ke dalam HTML proyek Anda:</p>
+                <div class="bg-slate-800 text-slate-100 p-4 rounded-lg mb-8 overflow-x-auto">
+                    <code>&lt;script src="https://cdn.jsdelivr.net/gh/stuckfull/annotator@main/annotator.js"&gt;&lt;/script&gt;</code>
+                </div>
+
+                <div class="p-6 bg-indigo-50 rounded-xl border border-indigo-100 mb-6">
+                    <p class="mb-2 font-semibold text-indigo-900 text-lg">💡 Area Pengujian (AJAX Interceptor)</p>
+                    <p class="mb-4 text-indigo-700">Gunakan tombol di bawah ini untuk mensimulasikan pemanggilan API Fetch. Annotator akan mencatat request ini di background.</p>
+                    <button onclick="fetchMockData()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow font-medium">Simulasi Request Fetch API</button>
+                    <p id="fetch-result" class="mt-4 text-sm text-indigo-800 font-mono"></p>
                 </div>
             `,
             '/about': `
