@@ -99,14 +99,12 @@
     const badge = document.createElement('div');
     badge.id = 'fst-annotator-badge';
     badge.className = 'fst-annotator-ui';
-    document.body.appendChild(badge);
 
     const trigger = document.createElement('div');
     trigger.id = 'fst-annotator-trigger';
     trigger.className = 'fst-annotator-ui';
     trigger.title = "Drag me or Click to open panel";
     trigger.innerText = 'FST';
-    document.body.appendChild(trigger);
 
     const panel = document.createElement('div');
     panel.id = 'fst-annotator-panel';
@@ -125,7 +123,6 @@
       <button id="fst-annotator-btn-close-panel" class="fst-annotator-btn secondary">Close Panel</button>
     </div>
   `;
-    document.body.appendChild(panel);
 
     const notePopup = document.createElement('div');
     notePopup.id = 'fst-annotator-note-popup';
@@ -138,7 +135,6 @@
       <button id="fst-annotator-btn-save-note" class="fst-annotator-btn success">Save Note</button>
     </div>
   `;
-    document.body.appendChild(notePopup);
 
     const mdPopup = document.createElement('div');
     mdPopup.id = 'fst-annotator-md-popup';
@@ -151,7 +147,32 @@
       <button id="fst-annotator-btn-copy-md" class="fst-annotator-btn success">Copy to Clipboard</button>
     </div>
   `;
-    document.body.appendChild(mdPopup);
+
+    // --- SPA PERSISTENCE ---
+    const ensureUI = () => {
+        if (!document.body) return;
+        const elements = [badge, trigger, panel, notePopup, mdPopup];
+        elements.forEach(el => {
+            if (!document.body.contains(el)) document.body.appendChild(el);
+        });
+        if (!document.head.contains(style)) document.head.appendChild(style);
+    };
+
+    let currentBody = document.body;
+    const uiObserver = new MutationObserver(() => ensureUI());
+    
+    // Interval check as fallback for full body replacement
+    setInterval(() => {
+        if (currentBody !== document.body) {
+            uiObserver.disconnect();
+            currentBody = document.body;
+            if (currentBody) uiObserver.observe(currentBody, { childList: true });
+        }
+        ensureUI();
+    }, 1000);
+
+    ensureUI();
+    if (currentBody) uiObserver.observe(currentBody, { childList: true });
 
     // --- 4. CORE LOGIC & EVENT HANDLERS ---
 
