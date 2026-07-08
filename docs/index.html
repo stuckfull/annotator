@@ -196,15 +196,13 @@
         const routes = {
             '/': `
                 <h2>FST Annotator</h2>
-                <p><strong>FST Annotator</strong> adalah tool <em>client-side</em> ringan (Vanilla JS) yang berfungsi sebagai <strong>Man-In-The-Middle Debugger</strong>. Alat ini memungkinkan Developer atau tim QA untuk menganotasi elemen antarmuka langsung di browser, mencegat (intercept) event klik, serta secara otomatis merekam riwayat navigasi dan Network API Logs.</p>
+                <p>Tool <em>client-side</em> (Vanilla JS) ringan untuk <strong>Man-In-The-Middle Debugging</strong>. Mencegat event klik, mencatat <em>User Journey</em>, menangkap <em>Network Logs</em> (Fetch & XHR) secara <em>background</em>, lalu merangkumnya dalam Markdown untuk AI Prompt atau Bug Report.</p>
                 
                 <h3>🚀 Fitur Utama</h3>
                 <ul>
-                    <li><strong>Visual Element Selector:</strong> Arahkan kursor dan klik elemen apa saja di layar untuk menandainya (dilengkapi dengan outline interaktif dan pencatatan CSS Selector serta Tag HTML secara otomatis).</li>
-                    <li><strong>Save & Release (MITM Debugger):</strong> Mem-pause event klik asli, memberikan waktu untuk menulis anotasi/bug report, lalu meneruskan event tersebut agar flow web berjalan normal.</li>
-                    <li><strong>Network Log Interceptor:</strong> Secara background menangkap semua request HTTP dari Fetch API maupun XMLHttpRequest (termasuk payload).</li>
-                    <li><strong>SPA & SSR Persistence:</strong> History klik dan jaringan disimpan di sessionStorage, sehingga persisten meski terjadi navigasi SPA maupun Full-Page Reload.</li>
-                    <li><strong>Auto Markdown Report:</strong> Menghasilkan laporan AI Debugging berformat Markdown yang rapi.</li>
+                    <li><strong>Intercept & Release:</strong> Jeda interaksi asli -> Tulis Anotasi -> Teruskan event agar web berjalan normal.</li>
+                    <li><strong>Auto Network Logger:</strong> Merekam payload & response dari aktivitas API (SPA/SSR) secara persisten lewat <code>sessionStorage</code>.</li>
+                    <li><strong>Initiator Detection:</strong> Mendeteksi apakah elemen di-render secara SSR atau dinamis di Client-Side.</li>
                 </ul>
 
                 <h3>📦 Instalasi</h3>
@@ -219,6 +217,42 @@
                     <button onclick="fetchMockData()">Simulasi Request Fetch API</button>
                     <div id="fetch-result" class="result-text"></div>
                 </div>
+
+                <h3>📝 Contoh Report</h3>
+                <p>Report ini langsung di-<em>generate</em> oleh FST dan di-<em>copy</em> ke clipboard Anda:</p>
+                <div class="code-block" style="white-space: pre-wrap;"># AI Debugging Report
+**Session:** Session 1
+**Generated:** 08/07/2026, 15:30:00
+
+### [Issue #1] Target Element
+- **URL:** https://example.com/checkout
+- **Initiator:** Client-Side (Dynamically Rendered)
+- **Tag Name:** \`&lt;button&gt;\`
+- **Selector:** \`button#submit-order.btn.btn-primary\`
+- **HTML Snippet:** \`&lt;button id="submit-order" class="btn btn-primary" data-item="123"&gt;Bayar Sekarang&lt;/button&gt;\`
+- **Element Text:** "Bayar Sekarang"
+
+**Instruction / Note:**
+&gt; Tombol payment stuck loading setelah user memilih metode transfer bank.
+
+**User Journey (Before Issue):**
+1. [15:29:45] **PAGE_LOAD** -&gt; \`/checkout\`
+2. [15:29:48] **CLICK** -&gt; \`input[type="radio"]#bank-transfer\`
+3. [15:29:50] **CLICK** -&gt; \`button#submit-order.btn.btn-primary\`
+
+**Recent Network API Logs:** 
+\`\`\`json
+[
+  {
+    "time": "15:29:51",
+    "url": "/api/payment/select",
+    "method": "POST",
+    "reqBody": "{\\"method\\":\\"bank_transfer\\",\\"amount\\":50000}",
+    "status": 500,
+    "resBody": "{\\"error\\":\\"Internal Server Error\\"}"
+  }
+]
+\`\`\`</div>
             `,
             '/about': `
                 <h2>Tentang FST Annotator</h2>
