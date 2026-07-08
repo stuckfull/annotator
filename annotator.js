@@ -27,12 +27,18 @@
         saveDB(DB);
     }
 
+    const getLogs = () => {
+        try { return JSON.parse(sessionStorage.getItem('fst_annotator_logs')) || { network: [], events: [] }; }
+        catch (e) { return { network: [], events: [] }; }
+    };
+    const saveLogs = (logs) => sessionStorage.setItem('fst_annotator_logs', JSON.stringify(logs));
+
     const STATE = {
         isDebugMode: false,
         hoveredElement: null,
         isReleasing: false,
         pendingElement: null,
-        logs: { network: [], events: [] }
+        logs: getLogs()
     };
 
     const getActiveSession = () => DB.sessions[DB.activeSession];
@@ -41,11 +47,16 @@
     const addNetworkLog = (req, res) => {
         STATE.logs.network.push({ time: new Date().toLocaleTimeString(), ...req, ...res });
         if (STATE.logs.network.length > 50) STATE.logs.network.shift();
+        saveLogs(STATE.logs);
     };
     const addEventLog = (action, details) => {
         STATE.logs.events.push({ time: new Date().toLocaleTimeString(), action, details });
         if (STATE.logs.events.length > 50) STATE.logs.events.shift();
+        saveLogs(STATE.logs);
     };
+
+    // Mencatat saat halaman SSR baru dimuat
+    addEventLog('PAGE_LOAD', window.location.pathname);
 
     // Override Fetch & History
     const originalFetch = window.fetch;
