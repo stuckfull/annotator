@@ -15,9 +15,6 @@
 
     let DB = loadDB();
 
-    // Migrasi aman jika DB versi lama belum punya sessionCounter
-    if (!DB.sessionCounter) DB.sessionCounter = 1;
-
     // Inisialisasi sesi default jika kosong
     if (Object.keys(DB.sessions).length === 0) {
         const defaultId = 'sess_' + Date.now();
