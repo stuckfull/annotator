@@ -52,13 +52,19 @@
     window.fetch = async function (...args) {
         const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
         const method = args[1]?.method || 'GET';
+        
+        let reqBody = args[1]?.body;
+        if (typeof reqBody === 'string') reqBody = reqBody.substring(0, 300);
+        else if (reqBody instanceof FormData) reqBody = '[FormData]';
+        else if (reqBody) reqBody = '[Object/Blob]';
+
         try {
             const response = await originalFetch.apply(this, args);
             const clone = response.clone();
-            clone.text().then(body => addNetworkLog({ url, method }, { status: response.status, body: body.substring(0, 300) })).catch(() => { });
+            clone.text().then(resBody => addNetworkLog({ url, method, reqBody }, { status: response.status, resBody: resBody.substring(0, 300) })).catch(() => { });
             return response;
         } catch (error) {
-            addNetworkLog({ url, method }, { status: 'FAILED', error: error.message });
+            addNetworkLog({ url, method, reqBody }, { status: 'FAILED', error: error.message });
             throw error;
         }
     };
@@ -69,6 +75,7 @@
         const xhr = new originalXHR();
         let method = 'GET';
         let url = 'unknown';
+        let reqBody = null;
 
         const originalOpen = xhr.open;
         xhr.open = function(...args) {
@@ -77,18 +84,27 @@
             return originalOpen.apply(xhr, args);
         };
 
+        const originalSend = xhr.send;
+        xhr.send = function(body) {
+            if (typeof body === 'string') reqBody = body.substring(0, 300);
+            else if (body instanceof FormData) reqBody = '[FormData]';
+            else if (body) reqBody = '[Object/Blob]';
+            
+            return originalSend.apply(xhr, arguments);
+        };
+
         xhr.addEventListener('load', function() {
-            let body = '';
+            let resBody = '';
             try {
                 if (xhr.responseType === '' || xhr.responseType === 'text' || xhr.responseType === 'json') {
-                    body = (typeof xhr.response === 'string' ? xhr.response : JSON.stringify(xhr.response) || xhr.responseText || '').substring(0, 300);
+                    resBody = (typeof xhr.response === 'string' ? xhr.response : JSON.stringify(xhr.response) || xhr.responseText || '').substring(0, 300);
                 }
             } catch (e) { }
-            addNetworkLog({ url, method }, { status: xhr.status, body });
+            addNetworkLog({ url, method, reqBody }, { status: xhr.status, resBody });
         });
 
         xhr.addEventListener('error', function() {
-            addNetworkLog({ url, method }, { status: 'FAILED', error: 'XHR Network Error' });
+            addNetworkLog({ url, method, reqBody }, { status: 'FAILED', error: 'XHR Network Error' });
         });
 
         return xhr;
